@@ -1,0 +1,40 @@
+name: Deploy HTML to GitHub Pages
+
+# Define quando o pipeline vai rodar: a cada push na branch "main"
+on:
+  push:
+    branches: ["main"]
+
+# Permissões necessárias para o GitHub Actions ler o código e publicar no Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# As tarefas que o servidor virtual irá executar
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest # O sistema operacional do servidor temporário
+    
+    steps:
+      # Passo 1: Baixa o seu código para o servidor temporário
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      # Passo 2: Configura o ambiente do GitHub Pages
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      # Passo 3: Empacota seus arquivos HTML (Artifacts)
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.' # Pega todos os arquivos da raiz do repositório
+
+      # Passo 4: Publica o pacote no GitHub Pages
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
